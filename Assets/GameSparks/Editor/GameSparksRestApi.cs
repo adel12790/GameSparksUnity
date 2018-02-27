@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
+using UnityEditor;
 using System.Collections.Generic;
 using System;
 using System.IO;
 using System.Net;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace GameSparks.Editor
 {
@@ -13,6 +15,8 @@ namespace GameSparks.Editor
     public class GameSparksRestApi {
 
     	private static string HOST = "https://portal.gamesparks.net/";
+		private static string HOST2 = "http://repo.gamesparks.net/unity-sdk/";
+        private static string HOST3 = "https://config2.gamesparks.net/restv2/game/";
 
     	private static string REST_URL = HOST + "rest/";
 
@@ -46,16 +50,21 @@ namespace GameSparks.Editor
     	public static String setDownloadable(string apiKey, string username, string password, string shortCode, string fileName){
     		string url = REST_URL + apiKey + "/binarycontent/" + shortCode;
     		String ret = null;
-    		try{
-    			ret = GameSparksEditorFormUpload.UploadFile(url, fileName, username, password);
-    		}catch(WebException we){
-    			ret = "{\"responseCode\":-1,\"errorMessage\":\"" + we.Message + "\"}";
-    		}
+			string extension = Path.GetExtension (shortCode);
+			if (extension != null && extension.Length > 0) {
+				ret = "{\"responseCode\":-1,\"errorMessage\":\"No extension permitted\"}";
+			} else {
+				try {
+					ret = GameSparksEditorFormUpload.UploadFile (url, fileName, username, password);
+				} catch (WebException we) {
+					ret = "{\"responseCode\":-1,\"errorMessage\":\"" + we.Message + "\"}";
+				}
+			}
     		return ret;
     	}
 
     	public static String getApi(){
-    		string url = HOST + "sdk/" + GameSparksSettings.ApiKey + "/" + GameSparksSettings.ApiSecret + "/GameSparksCustomSDK501.cs";
+    		string url = HOST3 + GameSparksSettings.ApiKey + "/sdk/" + GameSparksSettings.ApiSecret + "/GameSparksCustomSDK501.cs";
     		Debug.Log(url);
     		WebClient wc = new WebClient();
     		String ret = null;
@@ -68,35 +77,108 @@ namespace GameSparks.Editor
     		return ret;
     	}
 
-    	public static System.Xml.XmlReader GetSDKInfo(){
-    		string url = HOST + "sdk/unity.xml";
-    		Debug.Log(url);
-    		WebClient wc = new WebClient();
-    		try{
-    			String data = wc.DownloadString(url);
-    			System.Xml.XmlReader reader = System.Xml.XmlTextReader.Create(new System.IO.StringReader(data));
-    			return reader;
-    		}catch(Exception e){
-    			Debug.Log(e.ToString());
-    			
-    		}
-    		return null;
-    	}
+		public static string GetLastVersion()
+		{
+			string url = HOST2 + "latest.json";
 
-    	public static bool UpdateSDKFile(String source, String target){
-    		if(!source.StartsWith("http")){
-    			source = HOST + "sdk/" + source;
-    		}
-    		Directory.CreateDirectory(Path.GetDirectoryName(target));
-    		WebClient wc = new WebClient();
-    		try{
-    			wc.DownloadFile(source, target);
-    			return true;
-    		}catch(Exception e){
-    			Debug.Log(e.ToString());
-    		}
-    		return false;
-    	}
+			//Debug.Log(url);
 
+			WebClient wc = new WebClient();
+
+			try
+			{
+				String data = wc.DownloadString(url);
+
+				LatestJSON latest = JsonUtility.FromJson<LatestJSON>(data);
+
+				return latest.version;
+			}
+			catch (Exception e)
+			{
+				Debug.Log(e.ToString());
+			}
+
+			return null;
+		}
+
+		public static Boolean CompareCurrentWithLastVersion(string current, string last)
+		{
+			char[] delimiterChars = {'.'};
+			int[] current2 = {};
+			int[] last2 = {};
+			int numbers;
+
+			try
+			{
+                current = Regex.Replace(current, "[^0-9.]", "");
+
+                current2 = Array.ConvertAll(current.Split(delimiterChars), s => Convert.ToInt32(s));
+			}
+			catch {
+			}
+
+			try
+			{
+                last = Regex.Replace(last, "[^0-9.]", "");
+
+                last2 = Array.ConvertAll(last.Split(delimiterChars), s => Convert.ToInt32(s));
+			}
+			catch {
+			}
+
+			numbers = current2.Length;
+
+			if (last2.Length < numbers) {
+				numbers = last2.Length;
+			}
+
+            for (int a = 0; a < numbers; a++) {
+                if (last2 [a] > current2 [a]) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		public static Boolean UpdateSDK(string version)
+		{
+			string url = HOST2 + "Gamesparks_Unity_" + version + ".unitypackage";
+
+			//Debug.Log(url);
+
+			WebClient wc = new WebClient();
+
+			try
+			{
+				String tempSDK = FileUtil.GetUniqueTempPathInProject();
+
+				wc.DownloadFile(url, tempSDK);
+
+				AssetDatabase.ImportPackage(tempSDK, false);
+
+				AssetDatabase.Refresh();
+
+				return true;
+			}
+			catch (Exception e)
+			{
+				Debug.Log(e.ToString());
+			}
+
+			return false;
+		}
+
+		private class LatestJSON
+		{
+			public string version;
+			public string changes;
+			
+			public LatestJSON()
+            {
+                version = null;
+                changes = null;
+            }
+		}
     }
 }
