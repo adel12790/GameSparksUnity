@@ -471,7 +471,7 @@ GameObject:
   - component: {fileID: 267084420}
   - component: {fileID: 267084419}
   m_Layer: 5
-  m_Name: Text
+  m_Name: StatusTxt
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -609,7 +609,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 395329751}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1211767766}
+        m_MethodName: OnRegister
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &395329751
@@ -1367,7 +1378,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1211767761}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ffccc640b36ddec42904018e88455f82, type: 3}
+  m_Script: {fileID: 11500000, guid: 48dc86af2f94bfb4388e2fefb52a04ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   displayName: {fileID: 1654828018}
@@ -1375,6 +1386,7 @@ MonoBehaviour:
   password: {fileID: 169498110}
   Loginbtn: {fileID: 2138699169}
   Registerbtn: {fileID: 395329750}
+  status: {fileID: 267084419}
 --- !u!1 &1232592328
 GameObject:
   m_ObjectHideFlags: 0
@@ -1828,7 +1840,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2138699170}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1211767766}
+        m_MethodName: OnLogin
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &2138699170

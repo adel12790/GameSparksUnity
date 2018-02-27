@@ -1,49 +1,72 @@
 ﻿using System.Collections;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class AuthManager : MonoBehaviour {
+public class AuthManager : MonoBehaviour
+{
 
     public InputField displayName, username, password;
     public Button Loginbtn, Registerbtn;
     public Text status;
 
-    public void Register(string displayName, string username, string password)
+    private void Awake()
+    {
+        ToggleButtonStates(false);
+    }
+
+    public void ValidateFields()
+    {
+        if (displayName.text != "" || username.text != "" || password.text != "")
+        {
+            ToggleButtonStates(true);
+        }
+        else
+        {
+            ToggleButtonStates(false);
+        }
+    }
+
+    public void OnRegister()
     {
         Debug.Log("Registering...");
         new GameSparks.Api.Requests.RegistrationRequest()
-            .SetDisplayName(displayName)
-            .SetUserName(username)
-            .SetPassword(password)
+            .SetDisplayName(displayName.text)
+            .SetUserName(username.text)
+            .SetPassword(password.text)
             .Send((response) =>
             {
                 if (!response.HasErrors)
                 {
-                    Debug.Log(response.DisplayName + " registered successfully");
+                    UpdateStatus(response.DisplayName + " registered successfully");
                 }
                 else
                 {
+                    UpdateStatus("couldn't register, Error: " + response.Errors);
                     Debug.LogError("couldn't register, Error: " + response.Errors);
                 }
 
             });
     }
 
-    public void Login(string username, string password)
+    public void OnLogin()
     {
         Debug.Log("Login...");
         new GameSparks.Api.Requests.AuthenticationRequest()
-                    .SetUserName(username)
-                    .SetPassword(password)
+                    .SetUserName(username.text)
+                    .SetPassword(password.text)
                     .Send((response) =>
                     {
                         if (!response.HasErrors)
                         {
-                            Debug.Log(response.DisplayName + " registered successfully");
+                            UpdateStatus(response.DisplayName + " Logged in successfully");
+                            SceneManager.LoadScene("Leaderboard");
+
                         }
                         else
                         {
+                            UpdateStatus("couldn't register, Error: " + response.Errors);
                             Debug.LogError("couldn't register, Error: " + response.Errors);
                         }
 
@@ -59,10 +82,11 @@ public class AuthManager : MonoBehaviour {
             {
                 if (!response.HasErrors)
                 {
-                    Debug.Log(response.DisplayName + " registered successfully");
+                    UpdateStatus(response.DisplayName + " registered successfully");
                 }
                 else
                 {
+                    UpdateStatus("couldn't register, Error: " + response.Errors);
                     Debug.LogError("couldn't register, Error: " + response.Errors);
                 }
 
@@ -81,3 +105,4 @@ public class AuthManager : MonoBehaviour {
         status.text = message;
     }
 }
+
