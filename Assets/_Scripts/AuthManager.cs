@@ -18,7 +18,7 @@ public class AuthManager : MonoBehaviour
 
     public void ValidateFields()
     {
-        if (displayName.text != "" || username.text != "" || password.text != "")
+        if (username.text != "" && password.text != "")
         {
             ToggleButtonStates(true);
         }
